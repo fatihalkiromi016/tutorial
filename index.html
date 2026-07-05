@@ -207,7 +207,7 @@
                     <i class="fas fa-robot text-indigo-600"></i>
                 </div>
                 <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm text-sm text-slate-700 max-w-[85%]">
-                    <p>Halo, bro! Gue <b>Gemini Academic Pro</b>. Data update Blok 5 terbaru udah masuk ke sistem! Banyak yang nilainya naik, tapi lo tetep stabil di papan atas murni. Keren! 😎</p>
+                    <p>Halo, bro! Gue <b>Gemini Academic Pro</b>. Ahaha sori bro kelepasan masukin langsung! Udah gue balikin nilai EB Blok 5 ke murni, dan update-an dari lo gue jadiin khusus buat grafik Pasca-Remedial (muncul pas toggle ditekan). Gaskeuuun! 🔥</p>
                 </div>
             </div>
         </div>
@@ -226,28 +226,28 @@
         const NILAI_KKM = 60; 
 
         // Data Mentah (NILAI ASLI / DOSA MASA LALU / PRE-REMEDIAL)
-        // B5 DIUPDATE SESUAI TABEL YANG DIKIRIMKAN TERBARU (Data Nilai Akhir Blok 5)
+        // b5 dikembalikan ke nilai MURNI ASLI (sebelum ikut remedial Blok 5)
         const rawData = [
-            { nim: "2511701001", name: "NABILA NASYWA KHALIDA YUMNA", b1: 31.29, b2: 31.34, b3: 40.77, b4: 50.00, b5: 39.00 },
+            { nim: "2511701001", name: "NABILA NASYWA KHALIDA YUMNA", b1: 31.29, b2: 31.34, b3: 40.77, b4: 50.00, b5: 35.81 },
             { nim: "2511701002", name: "RAFIF LUAY ASSADAAD", b1: 58.50, b2: 52.00, b3: 45.39, b4: 60.00, b5: 58.11 },
             { nim: "2511701003", name: "RAHMAT FATIH ALKIROMI", b1: 63.94, b2: 64.67, b3: 63.08, b4: 81.11, b5: 83.11 },
-            { nim: "2511701004", name: "ZULFIQAR ZULFA FAUZI", b1: 40.14, b2: 32.00, b3: 38.46, b4: 48.89, b5: 53.00 },
-            { nim: "2511701005", name: "MUHAMMAD ZULFAHMI ROHMAN", b1: 59.86, b2: 52.00, b3: 53.85, b4: 60.00, b5: 57.00 },
-            { nim: "2511701006", name: "MUTIARA DALI PRASTIWI", b1: 60.54, b2: 62.00, b3: 61.54, b4: 67.78, b5: 67.00 },
-            { nim: "2511701007", name: "KAYLA ZAHWA ADZAKYAH", b1: 45.58, b2: 42.67, b3: 36.92, b4: 58.89, b5: 55.00 },
+            { nim: "2511701004", name: "ZULFIQAR ZULFA FAUZI", b1: 40.14, b2: 32.00, b3: 38.46, b4: 48.89, b5: 38.52 },
+            { nim: "2511701005", name: "MUHAMMAD ZULFAHMI ROHMAN", b1: 59.86, b2: 52.00, b3: 53.85, b4: 60.00, b5: 50.68 },
+            { nim: "2511701006", name: "MUTIARA DALI PRASTIWI", b1: 60.54, b2: 62.00, b3: 61.54, b4: 67.78, b5: 65.54 },
+            { nim: "2511701007", name: "KAYLA ZAHWA ADZAKYAH", b1: 45.58, b2: 42.67, b3: 36.92, b4: 58.89, b5: 39.87 },
             { nim: "2511701008", name: "DEWAYUANATA WILHELMINA GHORA", b1: 42.86, b2: 39.33, b3: 38.46, b4: 54.44, b5: 42.57 },
             { nim: "2511701009", name: "AISYA AURELLIA DANISWORO", b1: 45.58, b2: 49.33, b3: 51.54, b4: 58.89, b5: 69.59 },
-            { nim: "2511701010", name: "AZZAHRA PURBA JATI", b1: 52.38, b2: 46.00, b3: 51.54, b4: 53.34, b5: 58.00 },
-            { nim: "2511701011", name: "REZKI PRAJAYANTO", b1: 46.94, b2: 56.67, b3: 46.16, b4: 61.11, b5: 59.00 },
+            { nim: "2511701010", name: "AZZAHRA PURBA JATI", b1: 52.38, b2: 46.00, b3: 51.54, b4: 53.34, b5: 29.05 },
+            { nim: "2511701011", name: "REZKI PRAJAYANTO", b1: 46.94, b2: 56.67, b3: 46.16, b4: 61.11, b5: 56.75 },
             { nim: "2511701012", name: "MUHAMMAD YUSUF HABIBI", b1: 46.94, b2: 43.34, b3: 42.31, b4: 54.44, b5: 63.51 },
             { nim: "2511701013", name: "MUHAMMAD ARIF RAIDZA FAIS", b1: 51.70, b2: 61.33, b3: 76.15, b4: 84.44, b5: 84.46 },
-            { nim: "2511701014", name: "YAHYA HANGGRAITO UTOMO", b1: 50.34, b2: 43.33, b3: 41.54, b4: 55.55, b5: 52.00 },
-            { nim: "2511701015", name: "NABILA PUTRI DEFIANTI", b1: 34.69, b2: 40.00, b3: 39.24, b4: 63.33, b5: 55.00 },
-            { nim: "2511701016", name: "HAMMAM AMANULLAH", b1: 34.01, b2: 34.67, b3: 46.16, b4: 40.00, b5: 55.00 },
+            { nim: "2511701014", name: "YAHYA HANGGRAITO UTOMO", b1: 50.34, b2: 43.33, b3: 41.54, b4: 55.55, b5: 51.35 },
+            { nim: "2511701015", name: "NABILA PUTRI DEFIANTI", b1: 34.69, b2: 40.00, b3: 39.24, b4: 63.33, b5: 54.73 },
+            { nim: "2511701016", name: "HAMMAM AMANULLAH", b1: 34.01, b2: 34.67, b3: 46.16, b4: 40.00, b5: 49.33 },
             { nim: "2511701017", name: "NABILA SYIFA ANSARIA", b1: 47.62, b2: 44.00, b3: 53.85, b4: 64.45, b5: 56.08 },
             { nim: "2511701018", name: "PUTRI AULYA WULANDARI SUTRISNO", b1: 55.78, b2: 50.00, b3: 30.00, b4: 73.34, b5: 72.97 },
             { nim: "2511701019", name: "ALIIFAH KHODIJAH", b1: 45.58, b2: 42.67, b3: 44.62, b4: 55.56, b5: 60.13 },
-            { nim: "2511701020", name: "FADHIL FATHI ALGHIFARI", b1: 36.05, b2: 23.34, b3: 49.24, b4: 35.56, b5: 35.00 },
+            { nim: "2511701020", name: "FADHIL FATHI ALGHIFARI", b1: 36.05, b2: 23.34, b3: 49.24, b4: 35.56, b5: 29.73 },
             { nim: "2511701021", name: "ANINDITA AZWA RAHMA", b1: 33.33, b2: 25.33, b3: 41.54, b4: 42.22, b5: 46.62 },
             { nim: "2511701022", name: "AYU SITI NURMEYLANI PUTRI SDH", b1: 63.94, b2: 51.33, b3: 71.54, b4: 76.67, b5: 68.92 },
             { nim: "2511701023", name: "DWI NUR TIRTA AJI", b1: 42.85, b2: 50.00, b3: 51.54, b4: 65.56, b5: 50.00 },
@@ -255,54 +255,54 @@
             { nim: "2511701025", name: "ANISAH NABILA ZAHRA", b1: 65.31, b2: 56.67, b3: 55.39, b4: 76.67, b5: 70.94 },
             { nim: "2511701026", name: "RA’IF GHANI", b1: 76.87, b2: 76.67, b3: 81.54, b4: 91.11, b5: 79.05 },
             { nim: "2511701027", name: "AYUDYA NAYLA FAUZIA AZZAHRA", b1: 46.26, b2: 54.00, b3: 60.77, b4: 74.45, b5: 60.81 },
-            { nim: "2511701028", name: "DAVITA VAASHTI CHOERUDIN", b1: 35.37, b2: 35.33, b3: 36.92, b4: 48.89, b5: 51.00 },
-            { nim: "2511701029", name: "ALYA GUIVARA KEIKO", b1: 38.09, b2: 46.67, b3: 46.93, b4: 61.11, b5: 61.00 },
-            { nim: "2511701030", name: "ROSYIDA HILMALIA MURTI", b1: 35.37, b2: 36.00, b3: 33.85, b4: 38.89, b5: 48.00 },
+            { nim: "2511701028", name: "DAVITA VAASHTI CHOERUDIN", b1: 35.37, b2: 35.33, b3: 36.92, b4: 48.89, b5: 47.97 },
+            { nim: "2511701029", name: "ALYA GUIVARA KEIKO", b1: 38.09, b2: 46.67, b3: 46.93, b4: 61.11, b5: 48.64 },
+            { nim: "2511701030", name: "ROSYIDA HILMALIA MURTI", b1: 35.37, b2: 36.00, b3: 33.85, b4: 38.89, b5: 31.76 },
             { nim: "2511701031", name: "CAESAR KAYLARU FIQROH", b1: 52.38, b2: 58.00, b3: 67.69, b4: 84.44, b5: 76.35 },
             { nim: "2511701032", name: "SYAHRA NURZAINAH SULDAM", b1: 42.18, b2: 49.34, b3: 38.47, b4: 66.66, b5: 60.81 },
             { nim: "2511701033", name: "A.AZIZAH KHAIRINNISWAH HAKZAH", b1: 70.75, b2: 72.66, b3: 83.85, b4: 91.11, b5: 93.24 },
             { nim: "2511701034", name: "RAISYA YEDI PUTRI", b1: 47.62, b2: 44.00, b3: 60.00, b4: 64.44, b5: 66.89 },
-            { nim: "2511701035", name: "RIFAYA MAHIRUNNISA NAILAH", b1: 37.42, b2: 42.00, b3: 40.77, b4: 54.45, b5: 57.00 },
+            { nim: "2511701035", name: "RIFAYA MAHIRUNNISA NAILAH", b1: 37.42, b2: 42.00, b3: 40.77, b4: 54.45, b5: 47.98 },
             { nim: "2511701036", name: "NAJMA MUFIIDA RAHMA", b1: 47.62, b2: 44.67, b3: 39.23, b4: 51.11, b5: 51.35 },
             { nim: "2511701037", name: "NUR ALISIA ANGGUN FEBRIANTI", b1: 48.30, b2: 43.34, b3: 50.77, b4: 53.34, b5: 54.05 },
             { nim: "2511701038", name: "NAURA NADHIFA RUFAIDA", b1: 79.59, b2: 75.33, b3: 80.77, b4: 90.00, b5: 86.49 },
-            { nim: "2511701039", name: "SALSABILA PUTRI ADHARY", b1: 39.46, b2: 34.00, b3: 38.46, b4: 45.56, b5: 45.00 },
+            { nim: "2511701039", name: "SALSABILA PUTRI ADHARY", b1: 39.46, b2: 34.00, b3: 38.46, b4: 45.56, b5: 37.16 },
             { nim: "2511701040", name: "NAJMI AL - MUJAHIDAH", b1: 61.23, b2: 54.67, b3: 66.92, b4: 78.89, b5: 66.21 },
-            { nim: "2511701041", name: "MUTIARA TSANI OKTAVIANY", b1: 47.62, b2: 45.34, b3: 50.77, b4: 56.67, b5: 54.00 },
+            { nim: "2511701041", name: "MUTIARA TSANI OKTAVIANY", b1: 47.62, b2: 45.34, b3: 50.77, b4: 56.67, b5: 43.92 },
             { nim: "2511701042", name: "SITI AGNIA RAHMA PAPUTUNGAN", b1: 47.62, b2: 48.67, b3: 53.85, b4: 73.34, b5: 65.54 },
-            { nim: "2511701043", name: "KINANTI PUTRI SARASWATI", b1: 33.33, b2: 32.67, b3: 41.54, b4: 42.22, b5: 46.00 },
-            { nim: "2511701044", name: "REVALINA VERONICHA", b1: 40.82, b2: 40.67, b3: 23.08, b4: 52.23, b5: 53.00 },
-            { nim: "2511701045", name: "MARWAH AZZHURA CHAHYANI", b1: 34.02, b2: 36.67, b3: 23.85, b4: 60.00, b5: 57.00 },
+            { nim: "2511701043", name: "KINANTI PUTRI SARASWATI", b1: 33.33, b2: 32.67, b3: 41.54, b4: 42.22, b5: 43.25 },
+            { nim: "2511701044", name: "REVALINA VERONICHA", b1: 40.82, b2: 40.67, b3: 23.08, b4: 52.23, b5: 45.27 },
+            { nim: "2511701045", name: "MARWAH AZZHURA CHAHYANI", b1: 34.02, b2: 36.67, b3: 23.85, b4: 60.00, b5: 54.73 },
             { nim: "2511701046", name: "SUCI RAHMADANI", b1: 51.02, b2: 52.67, b3: 47.69, b4: 66.67, b5: 58.11 },
-            { nim: "2511701047", name: "MAYSAH FITRIA MUFI SAKINAH", b1: 34.69, b2: 24.00, b3: 41.54, b4: 52.22, b5: 51.00 },
-            { nim: "2511701048", name: "MARINELLA ROMALDO FATIMA", b1: 45.58, b2: 36.67, b3: 43.08, b4: 55.56, b5: 55.00 },
+            { nim: "2511701047", name: "MAYSAH FITRIA MUFI SAKINAH", b1: 34.69, b2: 24.00, b3: 41.54, b4: 52.22, b5: 45.95 },
+            { nim: "2511701048", name: "MARINELLA ROMALDO FATIMA", b1: 45.58, b2: 36.67, b3: 43.08, b4: 55.56, b5: 53.38 },
             { nim: "2511701049", name: "REVA FATIA AZIZ", b1: 31.97, b2: 24.67, b3: 40.77, b4: 46.67, b5: 40.54 },
             { nim: "2511701050", name: "TALITA BELLISYA BHATARI RINDYA", b1: 43.54, b2: 25.33, b3: 37.70, b4: 44.45, b5: 43.25 }
         ];
 
         // OVERRIDE DATA PDF ASLI (Diambil presisi dari ketikan user)
-        // Jika nilainya murni dan sama dengan raw, script akan mendeteksinya sebagai murni
+        // Menyimpan nilai PASCA-REMEDIAL yang sesungguhnya (Bila tidak ada di list ini, fallback ke nilai MURNI)
         const exactRemediData = {
-            "2511701001": { b1_rem: 60.00, b2_rem: 36.00, b3_rem: 47.00, b4_rem: 67.14 },
+            "2511701001": { b1_rem: 60.00, b2_rem: 36.00, b3_rem: 47.00, b4_rem: 67.14, b5_rem: 39.00 },
             "2511701002": { b1_rem: 64.00, b2_rem: 59.00, b3_rem: 62.00, b4_rem: 70.00 },
             "2511701003": { b1_rem: 63.94, b2_rem: 64.67, b3_rem: 63.08, b4_rem: 81.11 },
-            "2511701004": { b1_rem: 70.00, b2_rem: 70.00, b3_rem: 40.00, b4_rem: 70.00 },
-            "2511701005": { b1_rem: 70.00, b2_rem: 65.00, b3_rem: 53.85, b4_rem: 60.00 },
-            "2511701006": { b1_rem: 60.54, b2_rem: 62.00, b3_rem: 70.00, b4_rem: 67.78 },
-            "2511701007": { b1_rem: 66.00, b2_rem: 55.00, b3_rem: 64.00, b4_rem: 70.00 },
+            "2511701004": { b1_rem: 70.00, b2_rem: 70.00, b3_rem: 40.00, b4_rem: 70.00, b5_rem: 53.00 },
+            "2511701005": { b1_rem: 70.00, b2_rem: 65.00, b3_rem: 53.85, b4_rem: 60.00, b5_rem: 57.00 },
+            "2511701006": { b1_rem: 60.54, b2_rem: 62.00, b3_rem: 70.00, b4_rem: 67.78, b5_rem: 67.00 },
+            "2511701007": { b1_rem: 66.00, b2_rem: 55.00, b3_rem: 64.00, b4_rem: 70.00, b5_rem: 55.00 },
             "2511701008": { b1_rem: 70.00, b2_rem: 52.00, b3_rem: 54.00, b4_rem: 70.00 },
             "2511701009": { b1_rem: 69.00, b2_rem: 70.00, b3_rem: 70.00, b4_rem: 70.00 },
-            "2511701010": { b1_rem: 64.00, b2_rem: 49.00, b3_rem: 68.00, b4_rem: 70.00 },
-            "2511701011": { b1_rem: 68.00, b2_rem: 70.00, b3_rem: 59.00, b4_rem: 70.00 },
+            "2511701010": { b1_rem: 64.00, b2_rem: 49.00, b3_rem: 68.00, b4_rem: 70.00, b5_rem: 58.00 },
+            "2511701011": { b1_rem: 68.00, b2_rem: 70.00, b3_rem: 59.00, b4_rem: 70.00, b5_rem: 59.00 },
             "2511701012": { b1_rem: 62.00, b2_rem: 70.00, b3_rem: 67.00, b4_rem: 70.00 },
             "2511701013": { b1_rem: 70.00, b2_rem: 61.33, b3_rem: 76.15, b4_rem: 84.44 },
-            "2511701014": { b1_rem: 70.00, b2_rem: 70.00, b3_rem: 49.00, b4_rem: 70.00 },
-            "2511701015": { b1_rem: 70.00, b2_rem: 43.00, b3_rem: 63.00, b4_rem: 70.00 },
-            "2511701016": { b1_rem: 65.00, b2_rem: 65.00, b3_rem: 52.00, b4_rem: 60.00 },
+            "2511701014": { b1_rem: 70.00, b2_rem: 70.00, b3_rem: 49.00, b4_rem: 70.00, b5_rem: 52.00 },
+            "2511701015": { b1_rem: 70.00, b2_rem: 43.00, b3_rem: 63.00, b4_rem: 70.00, b5_rem: 55.00 },
+            "2511701016": { b1_rem: 65.00, b2_rem: 65.00, b3_rem: 52.00, b4_rem: 60.00, b5_rem: 55.00 },
             "2511701017": { b1_rem: 64.00, b2_rem: 58.00, b3_rem: 64.00, b4_rem: 70.00 },
             "2511701018": { b1_rem: 70.00, b2_rem: 67.00, b3_rem: 65.00, b4_rem: 73.34 },
             "2511701019": { b1_rem: 65.00, b2_rem: 51.00, b3_rem: 54.00, b4_rem: 70.00 },
-            "2511701020": { b1_rem: 70.00, b2_rem: 70.00, b3_rem: 49.24, b4_rem: 35.56 },
+            "2511701020": { b1_rem: 70.00, b2_rem: 70.00, b3_rem: 49.24, b4_rem: 35.56, b5_rem: 35.00 },
             "2511701021": { b1_rem: 57.00, b2_rem: 35.00, b3_rem: 57.00, b4_rem: 68.57 },
             "2511701022": { b1_rem: 70.00, b2_rem: 62.00, b3_rem: 71.54, b4_rem: 76.67 },
             "2511701023": { b1_rem: 60.00, b2_rem: 64.00, b3_rem: 56.00, b4_rem: 70.00 },
@@ -310,27 +310,27 @@
             "2511701025": { b1_rem: 70.00, b2_rem: 64.00, b3_rem: 70.00, b4_rem: 76.67 },
             "2511701026": { b1_rem: 76.87, b2_rem: 76.67, b3_rem: 81.54, b4_rem: 91.11 },
             "2511701027": { b1_rem: 70.00, b2_rem: 64.00, b3_rem: 67.00, b4_rem: 74.45 },
-            "2511701028": { b1_rem: 60.00, b2_rem: 54.00, b3_rem: 56.00, b4_rem: 70.00 },
-            "2511701029": { b1_rem: 66.00, b2_rem: 62.00, b3_rem: 59.00, b4_rem: 70.00 },
-            "2511701030": { b1_rem: 43.00, b2_rem: 36.00, b3_rem: 49.00, b4_rem: 60.00 },
+            "2511701028": { b1_rem: 60.00, b2_rem: 54.00, b3_rem: 56.00, b4_rem: 70.00, b5_rem: 51.00 },
+            "2511701029": { b1_rem: 66.00, b2_rem: 62.00, b3_rem: 59.00, b4_rem: 70.00, b5_rem: 61.00 },
+            "2511701030": { b1_rem: 43.00, b2_rem: 36.00, b3_rem: 49.00, b4_rem: 60.00, b5_rem: 48.00 },
             "2511701031": { b1_rem: 69.00, b2_rem: 61.00, b3_rem: 67.69, b4_rem: 84.44 },
             "2511701032": { b1_rem: 63.00, b2_rem: 56.00, b3_rem: 53.00, b4_rem: 66.66 },
             "2511701033": { b1_rem: 70.75, b2_rem: 72.66, b3_rem: 83.85, b4_rem: 91.11 },
             "2511701034": { b1_rem: 66.00, b2_rem: 57.00, b3_rem: 66.00, b4_rem: 70.00 },
-            "2511701035": { b1_rem: 61.00, b2_rem: 51.00, b3_rem: 62.00, b4_rem: 70.00 },
+            "2511701035": { b1_rem: 61.00, b2_rem: 51.00, b3_rem: 62.00, b4_rem: 70.00, b5_rem: 57.00 },
             "2511701036": { b1_rem: 57.00, b2_rem: 48.00, b3_rem: 49.00, b4_rem: 67.14 },
             "2511701037": { b1_rem: 60.00, b2_rem: 54.00, b3_rem: 70.00, b4_rem: 70.00 },
             "2511701038": { b1_rem: 79.59, b2_rem: 75.33, b3_rem: 80.77, b4_rem: 90.00 },
-            "2511701039": { b1_rem: 56.00, b2_rem: 42.00, b3_rem: 48.00, b4_rem: 70.00 },
+            "2511701039": { b1_rem: 56.00, b2_rem: 42.00, b3_rem: 48.00, b4_rem: 70.00, b5_rem: 45.00 },
             "2511701040": { b1_rem: 61.23, b2_rem: 70.00, b3_rem: 66.92, b4_rem: 78.89 },
-            "2511701041": { b1_rem: 64.00, b2_rem: 62.00, b3_rem: 58.00, b4_rem: 70.00 },
+            "2511701041": { b1_rem: 64.00, b2_rem: 62.00, b3_rem: 58.00, b4_rem: 70.00, b5_rem: 54.00 },
             "2511701042": { b1_rem: 63.00, b2_rem: 59.00, b3_rem: 70.00, b4_rem: 73.34 },
-            "2511701043": { b1_rem: 63.00, b2_rem: 43.00, b3_rem: 54.00, b4_rem: 70.00 },
-            "2511701044": { b1_rem: 70.00, b2_rem: 52.00, b3_rem: 67.00, b4_rem: 70.00 },
-            "2511701045": { b1_rem: 57.00, b2_rem: 50.00, b3_rem: 59.00, b4_rem: 70.00 },
+            "2511701043": { b1_rem: 63.00, b2_rem: 43.00, b3_rem: 54.00, b4_rem: 70.00, b5_rem: 46.00 },
+            "2511701044": { b1_rem: 70.00, b2_rem: 52.00, b3_rem: 67.00, b4_rem: 70.00, b5_rem: 53.00 },
+            "2511701045": { b1_rem: 57.00, b2_rem: 50.00, b3_rem: 59.00, b4_rem: 70.00, b5_rem: 57.00 },
             "2511701046": { b1_rem: 67.00, b2_rem: 62.00, b3_rem: 54.00, b4_rem: 70.00 },
-            "2511701047": { b1_rem: 67.00, b2_rem: 40.00, b3_rem: 57.00, b4_rem: 70.00 },
-            "2511701048": { b1_rem: 67.00, b2_rem: 51.00, b3_rem: 62.00, b4_rem: 70.00 },
+            "2511701047": { b1_rem: 67.00, b2_rem: 40.00, b3_rem: 57.00, b4_rem: 70.00, b5_rem: 51.00 },
+            "2511701048": { b1_rem: 67.00, b2_rem: 51.00, b3_rem: 62.00, b4_rem: 70.00, b5_rem: 55.00 },
             "2511701049": { b1_rem: 40.00, b2_rem: 28.00, b3_rem: 48.00, b4_rem: 70.00 },
             "2511701050": { b1_rem: 70.00, b2_rem: 32.00, b3_rem: 50.00, b4_rem: 67.14 }
         };
@@ -686,7 +686,7 @@
                                             let rawVal = activeStudent['b' + bIdx];
                                             let remVal = activeStudent['b' + bIdx + '_rem'];
                                             if (rawVal === remVal) {
-                                                return bIdx === 5 ? `⏳ Status Wajib Remedial (Belum Ujian): ${value.toFixed(2)}` : `⚠️ Remedial (Gagal Naik Nilai): ${value.toFixed(2)}`;
+                                                return `⚠️ Remedial (Gagal Naik Nilai): ${value.toFixed(2)}`;
                                             }
                                             return `✨ Nilai Pasca-Remedial: ${value.toFixed(2)}`;
                                         }
@@ -738,8 +738,7 @@
                         el.innerHTML = `<span class="line-through text-red-400 text-xs mr-2">${raw.toFixed(2)}</span><span class="text-emerald-600 font-black">${rem.toFixed(2)}</span>`;
                     } else {
                         // Remedial tapi gagal nambah nilai atau belum ujian
-                        const titleTxt = (idx === 4) ? "Belum Ujian Remedial" : "Remedial gagal naik nilai";
-                        el.innerHTML = `<span class="line-through text-red-400 text-xs mr-2">${raw.toFixed(2)}</span><span class="text-orange-500 font-black" title="${titleTxt}">${rem.toFixed(2)}</span>`;
+                        el.innerHTML = `<span class="line-through text-red-400 text-xs mr-2">${raw.toFixed(2)}</span><span class="text-orange-500 font-black" title="Remedial gagal naik nilai">${rem.toFixed(2)}</span>`;
                     }
                 } else {
                     el.textContent = raw.toFixed(2);
