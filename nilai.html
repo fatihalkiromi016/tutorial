@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistik Nilai Mahasiswa Kedokteran UNISA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; overflow-x: hidden; }
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 0.3s, transform 0.3s; }
+        .modal-leave { opacity: 1; transform: scale(1); }
+        .modal-leave-active { opacity: 0; transform: scale(0.95); transition: opacity 0.3s, transform 0.3s; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .typing-effect::after { content: '|'; animation: blink 1s step-start infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+        .dot-flashing { position: relative; width: 6px; height: 6px; border-radius: 3px; background-color: #6366f1; color: #6366f1; animation: dot-flashing 1s infinite linear alternate; animation-delay: 0.5s; }
+        .dot-flashing::before, .dot-flashing::after { content: ''; display: inline-block; position: absolute; top: 0; width: 6px; height: 6px; border-radius: 3px; background-color: #6366f1; color: #6366f1; animation: dot-flashing 1s infinite alternate; }
+        .dot-flashing::before { left: -10px; animation-delay: 0s; }
+        .dot-flashing::after { left: 10px; animation-delay: 1s; }
+        @keyframes dot-flashing { 0% { background-color: #6366f1; } 50%, 100% { background-color: #e0e7ff; } }
+        .markdown-body p { margin-bottom: 0.75em; }
+        .markdown-body strong { font-weight: 700; color: #1e1b4b; }
+        .markdown-body ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 0.75em; }
+        .markdown-body ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 0.75em; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased">
+
+    <nav class="bg-emerald-700 text-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-stethoscope text-2xl"></i>
+                    <h1 class="font-bold text-xl tracking-tight">Akademik Kedokteran UNISA</h1>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-all duration-300" id="main-content">
+        <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <div>
+                <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Analisis Nilai Evaluasi (Running Average)</h2>
+                <p class="text-slate-500">Distribusi rata-rata nilai murni dari 50 mahasiswa Kedokteran berdasarkan Z-Score & Rank.</p>
+            </div>
+            <span class="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-sm font-bold bg-blue-100 text-blue-800 border border-blue-200 shadow-sm">
+                <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+                Updated: Blok 5
+            </span>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col items-center justify-center">
+                <span class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">Rata-Rata Kelas (&mu;)</span>
+                <span class="text-3xl font-bold text-emerald-600" id="stat-mean">0</span>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col items-center justify-center">
+                <span class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">Standar Deviasi (&sigma;)</span>
+                <span class="text-3xl font-bold text-blue-600" id="stat-sd">0</span>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col items-center justify-center">
+                <span class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">Nilai Tertinggi</span>
+                <span class="text-3xl font-bold text-slate-800" id="stat-max">0</span>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col items-center justify-center">
+                <span class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">Nilai Terendah</span>
+                <span class="text-3xl font-bold text-slate-800" id="stat-min">0</span>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-10 relative">
+            <h3 class="text-lg font-bold mb-4 text-center">Grafik Rata-rata Murni Mahasiswa vs Batas Standar Deviasi & KKM</h3>
+            
+            <div class="w-full overflow-x-auto pb-4 custom-scrollbar">
+                <div style="min-width: 1500px; height: 400px;">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap justify-center items-center gap-4 mt-6 text-xs sm:text-sm font-medium">
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Elite (Top 3)</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-blue-500"></span> Top Scholar (Rank 4-10)</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-yellow-400"></span> Solid Performer</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-orange-500"></span> Striver (&le; -0.5&sigma;)</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-red-500"></span> Critical Focus (&le; -1.5&sigma;)</span>
+                <span class="flex items-center gap-1 ml-2 pl-2 border-l border-slate-300"><i class="fas fa-minus text-red-600"></i> KKM (Lulus)</span>
+            </div>
+        </div>
+
+        <div>
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <h3 class="text-2xl font-bold text-slate-900">Daftar Mahasiswa</h3>
+                <div class="relative w-full md:w-72">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-slate-400"></i>
+                    </div>
+                    <input type="text" id="searchInput" class="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg leading-5 bg-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" placeholder="Cari nama atau NIM...">
+                </div>
+            </div>
+            <div id="studentGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch"></div>
+        </div>
+    </main>
+
+    <div id="studentModal" class="fixed inset-0 z-[60] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            <div id="modalOverlay" class="fixed inset-0 bg-slate-900 bg-opacity-75 transition-opacity opacity-0 cursor-pointer"></div>
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl w-full modal-enter">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-2xl font-bold text-slate-900" id="modalName">Nama Mahasiswa</h3>
+                            <p class="text-sm text-slate-500 mt-1 font-mono" id="modalNim">NIM: 0000000000</p>
+                            <!-- Container Badge Modal -->
+                            <div id="modalBadges" class="flex flex-wrap gap-2 mt-2"></div>
+                            
+                            <!-- Toggle Remedial -->
+                            <div id="remedialToggleContainer" class="hidden mt-3 pt-3 border-t border-slate-100">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="remedialToggle" class="sr-only peer">
+                                    <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-500"></div>
+                                    <span class="ml-2 text-xs font-bold text-indigo-700 uppercase tracking-wide"><i class="fas fa-magic"></i> Lihat Efek Remedial</span>
+                                </label>
+                            </div>
+                        </div>
+                        <button id="closeModalBtn" class="text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer">
+                            <i class="fas fa-times text-2xl"></i>
+                        </button>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div class="text-center sm:text-left">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider" id="avgLabel">Rata-rata Asli (Murni)</p>
+                            <p class="text-3xl font-black text-slate-800" id="modalAvg">0.00</p>
+                        </div>
+                        <div class="text-center sm:text-right flex-1">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Gelar Akademik</p>
+                            <div class="inline-flex items-center gap-2 mt-1 px-4 py-2 rounded-full font-bold text-sm shadow-sm" id="modalTitleBadge"></div>
+                            <p class="text-xs text-slate-500 mt-2" id="modalZScoreDesc">Z-Score: 0</p>
+                        </div>
+                    </div>
+
+                    <div class="w-full h-56 mb-4 relative">
+                        <canvas id="studentChart"></canvas>
+                    </div>
+                    
+                    <div class="grid grid-cols-5 gap-2 mt-4 text-center">
+                        <div class="bg-slate-50 p-2 rounded border border-slate-100">
+                            <p class="text-[10px] text-slate-500 uppercase font-bold">Blok 1</p>
+                            <p class="font-bold text-slate-800 text-sm" id="modalB1">-</p>
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded border border-slate-100">
+                            <p class="text-[10px] text-slate-500 uppercase font-bold">Blok 2</p>
+                            <p class="font-bold text-slate-800 text-sm" id="modalB2">-</p>
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded border border-slate-100">
+                            <p class="text-[10px] text-slate-500 uppercase font-bold">Blok 3</p>
+                            <p class="font-bold text-slate-800 text-sm" id="modalB3">-</p>
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded border border-slate-100">
+                            <p class="text-[10px] text-slate-500 uppercase font-bold">Blok 4</p>
+                            <p class="font-bold text-slate-800 text-sm" id="modalB4">-</p>
+                        </div>
+                        <div class="bg-blue-50 p-2 rounded border border-blue-100 relative overflow-hidden shadow-sm">
+                             <div class="absolute top-0 right-0 w-8 h-8 bg-blue-200 rounded-bl-full z-0 flex items-start justify-end pr-1 pt-0.5"><span class="text-[8px] text-blue-700 font-bold">NEW</span></div>
+                            <p class="text-[10px] text-blue-600 uppercase font-bold relative z-10">BLOK 5</p>
+                            <p class="font-bold text-blue-900 text-sm relative z-10" id="modalB5">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI CHATBOX SIDEBAR -->
+    <button id="fab-chat" class="fixed bottom-6 right-6 bg-indigo-600 text-white w-14 h-14 rounded-full shadow-2xl hover:bg-indigo-700 hover:scale-105 transition-all flex items-center justify-center z-40 focus:outline-none ring-4 ring-indigo-100">
+        <i class="fas fa-robot text-2xl"></i>
+    </button>
+
+    <div id="ai-sidebar" class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50 flex flex-col border-l border-slate-200">
+        <div class="bg-indigo-600 p-4 text-white flex justify-between items-center shadow-md shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/20 p-2 rounded-lg">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-lg leading-tight">Gemini Academic Pro</h2>
+                    <p class="text-indigo-200 text-xs">Powered by Groq (Llama-3)</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button id="btn-close-chat" class="text-indigo-200 hover:text-white transition-colors p-1 ml-2 focus:outline-none">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="chat-history" class="flex-1 overflow-y-auto p-4 bg-slate-50 flex flex-col gap-4">
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                    <i class="fas fa-robot text-indigo-600"></i>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm text-sm text-slate-700 max-w-[85%]">
+                    <p>Halo, bro! Gue <b>Gemini Academic Pro</b>. Lencana <b>"Bebas Remedi (100% Murni)"</b> udah gue pasang buat mahasiswa tanpa riwayat remed. Tampilan kartu dijamin rata paripurna! 😎</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 bg-white border-t border-slate-200 shrink-0">
+            <form id="chat-form" class="relative flex items-end gap-2">
+                <textarea id="chat-input" rows="1" placeholder="Tanya analisis, target nilai, dll..." class="w-full bg-slate-100 border-transparent focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 rounded-xl pl-4 pr-12 py-3 text-sm resize-none outline-none transition-all" style="min-height: 48px; max-height: 120px;"></textarea>
+                <button type="submit" id="btn-send" class="absolute right-2 bottom-2 w-8 h-8 flex items-center justify-center bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    <i class="fas fa-paper-plane text-xs mt-0.5 mr-0.5"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const NILAI_KKM = 60; 
+
+        // Data Mentah (NILAI ASLI / DOSA MASA LALU / PRE-REMEDIAL)
+        const rawData = [
+            { nim: "2511701001", name: "NABILA NASYWA KHALIDA YUMNA", b1: 31.29, b2: 31.34, b3: 40.77, b4: 50.00, b5: 35.81 },
+            { nim: "2511701002", name: "RAFIF LUAY ASSADAAD", b1: 58.50, b2: 52.00, b3: 45.39, b4: 60.00, b5: 58.11 },
+            { nim: "2511701003", name: "RAHMAT FATIH ALKIROMI", b1: 63.94, b2: 64.67, b3: 63.08, b4: 81.11, b5: 83.11 },
+            { nim: "2511701004", name: "ZULFIQAR ZULFA FAUZI", b1: 40.14, b2: 32.00, b3: 38.46, b4: 48.89, b5: 38.52 },
+            { nim: "2511701005", name: "MUHAMMAD ZULFAHMI ROHMAN", b1: 59.86, b2: 52.00, b3: 53.85, b4: 60.00, b5: 50.68 },
+            { nim: "2511701006", name: "MUTIARA DALI PRASTIWI", b1: 60.54, b2: 62.00, b3: 61.54, b4: 67.78, b5: 65.54 },
+            { nim: "2511701007", name: "KAYLA ZAHWA ADZAKYAH", b1: 45.58, b2: 42.67, b3: 36.92, b4: 58.89, b5: 39.87 },
+            { nim: "2511701008", name: "DEWAYUANATA WILHELMINA GHORA", b1: 42.86, b2: 39.33, b3: 38.46, b4: 54.44, b5: 42.57 },
+            { nim: "2511701009", name: "AISYA AURELLIA DANISWORO", b1: 45.58, b2: 49.33, b3: 51.54, b4: 58.89, b5: 69.59 },
+            { nim: "2511701010", name: "AZZAHRA PURBA JATI", b1: 52.38, b2: 46.00, b3: 51.54, b4: 53.34, b5: 29.05 },
+            { nim: "2511701011", name: "REZKI PRAJAYANTO", b1: 46.94, b2: 56.67, b3: 46.16, b4: 61.11, b5: 56.75 },
+            { nim: "2511701012", name: "MUHAMMAD YUSUF HABIBI", b1: 46.94, b2: 43.34, b3: 42.31, b4: 54.44, b5: 63.51 },
+            { nim: "2511701013", name: "MUHAMMAD ARIF RAIDZA FAIS", b1: 51.70, b2: 61.33, b3: 76.15, b4: 84.44, b5: 84.46 },
+            { nim: "2511701014", name: "YAHYA HANGGRAITO UTOMO", b1: 50.34, b2: 43.33, b3: 41.54, b4: 55.55, b5: 51.35 },
+            { nim: "2511701015", name: "NABILA PUTRI DEFIANTI", b1: 34.69, b2: 40.00, b3: 39.24, b4: 63.33, b5: 54.73 },
+            { nim: "2511701016", name: "HAMMAM AMANULLAH", b1: 34.01, b2: 34.67, b3: 46.16, b4: 40.00, b5: 49.33 },
+            { nim: "2511701017", name: "NABILA SYIFA ANSARIA", b1: 47.62, b2: 44.00, b3: 53.85, b4: 64.45, b5: 56.08 },
+            { nim: "2511701018", name: "PUTRI AULYA WULANDARI SUTRISNO", b1: 55.78, b2: 50.00, b3: 30.00, b4: 73.34, b5: 72.97 },
+            { nim: "2511701019", name: "ALIIFAH KHODIJAH", b1: 45.58, b2: 42.67, b3: 44.62, b4: 55.56, b5: 60.13 },
+            { nim: "2511701020", name: "FADHIL FATHI ALGHIFARI", b1: 36.05, b2: 23.34, b3: 49.24, b4: 35.56, b5: 29.73 },
+            { nim: "2511701021", name: "ANINDITA AZWA RAHMA", b1: 33.33, b2: 25.33, b3: 41.54, b4: 42.22, b5: 46.62 },
+            { nim: "2511701022", name: "AYU SITI NURMEYLANI PUTRI SDH", b1: 63.94, b2: 51.33, b3: 71.54, b4: 76.67, b5: 68.92 },
+            { nim: "2511701023", name: "DWI NUR TIRTA AJI", b1: 42.85, b2: 50.00, b3: 51.54, b4: 65.56, b5: 50.00 },
+            { nim: "2511701024", name: "SATYA MEVA GAMA", b1: 42.17, b2: 43.34, b3: 41.54, b4: 52.22, b5: 62.16 },
+            { nim: "2511701025", name: "ANISAH NABILA ZAHRA", b1: 65.31, b2: 56.67, b3: 55.39, b4: 76.67, b5: 70.94 },
+            { nim: "2511701026", name: "RA’IF GHANI", b1: 76.87, b2: 76.67, b3: 81.54, b4: 91.11, b5: 79.05 },
+            { nim: "2511701027", name: "AYUDYA NAYLA FAUZIA AZZAHRA", b1: 46.26, b2: 54.00, b3: 60.77, b4: 74.45, b5: 60.81 },
+            { nim: "2511701028", name: "DAVITA VAASHTI CHOERUDIN", b1: 35.37, b2: 35.33, b3: 36.92, b4: 48.89, b5: 47.97 },
+            { nim: "2511701029", name: "ALYA GUIVARA KEIKO", b1: 38.09, b2: 46.67, b3: 46.93, b4: 61.11, b5: 48.64 },
+            { nim: "2511701030", name: "ROSYIDA HILMALIA MURTI", b1: 35.37, b2: 36.00, b3: 33.85, b4: 38.89, b5: 31.76 },
+            { nim: "2511701031", name: "CAESAR KAYLARU FIQROH", b1: 52.38, b2: 58.00, b3: 67.69, b4: 84.44, b5: 76.35 },
+            { nim: "2511701032", name: "SYAHRA NURZAINAH SULDAM", b1: 42.18, b2: 49.34, b3: 38.47, b4: 66.66, b5: 60.81 },
+            { nim: "2511701033", name: "A.AZIZAH KHAIRINNISWAH HAKZAH", b1: 70.75, b2: 72.66, b3: 83.85, b4: 91.11, b5: 93.24 },
+            { nim: "2511701034", name: "RAISYA YEDI PUTRI", b1: 47.62, b2: 44.00, b3: 60.00, b4: 64.44, b5: 66.89 },
+            { nim: "2511701035", name: "RIFAYA MAHIRUNNISA NAILAH", b1: 37.42, b2: 42.00, b3: 40.77, b4: 54.45, b5: 47.98 },
+            { nim: "2511701036", name: "NAJMA MUFIIDA RAHMA", b1: 47.62, b2: 44.67, b3: 39.23, b4: 51.11, b5: 51.35 },
+            { nim: "2511701037", name: "NUR ALISIA ANGGUN FEBRIANTI", b1: 48.30, b2: 43.34, b3: 50.77, b4: 53.34, b5: 54.05 },
+            { nim: "2511701038", name: "NAURA NADHIFA RUFAIDA", b1: 79.59, b2: 75.33, b3: 80.77, b4: 90.00, b5: 86.49 },
+            { nim: "2511701039", name: "SALSABILA PUTRI ADHARY", b1: 39.46, b2: 34.00, b3: 38.46, b4: 45.56, b5: 37.16 },
+            { nim: "2511701040", name: "NAJMI AL - MUJAHIDAH", b1: 61.23, b2: 54.67, b3: 66.92, b4: 78.89, b5: 66.21 },
+            { nim: "2511701041", name: "MUTIARA TSANI OKTAVIANY", b1: 47.62, b2: 45.34, b3: 50.77, b4: 56.67, b5: 43.92 },
+            { nim: "2511701042", name: "SITI AGNIA RAHMA PAPUTUNGAN", b1: 47.62, b2: 48.67, b3: 53.85, b4: 73.34, b5: 65.54 },
+            { nim: "2511701043", name: "KINANTI PUTRI SARASWATI", b1: 33.33, b2: 32.67, b3: 41.54, b4: 42.22, b5: 43.25 },
+            { nim: "2511701044", name: "REVALINA VERONICHA", b1: 40.82, b2: 40.67, b3: 23.08, b4: 52.23, b5: 45.27 },
+            { nim: "2511701045", name: "MARWAH AZZHURA CHAHYANI", b1: 34.02, b2: 36.67, b3: 23.85, b4: 60.00, b5: 54.73 },
+            { nim: "2511701046", name: "SUCI RAHMADANI", b1: 51.02, b2: 52.67, b3: 47.69, b4: 66.67, b5: 58.11 },
+            { nim: "2511701047", name: "MAYSAH FITRIA MUFI SAKINAH", b1: 34.69, b2: 24.00, b3: 41.54, b4: 52.22, b5: 45.95 },
+            { nim: "2511701048", name: "MARINELLA ROMALDO FATIMA", b1: 45.58, b2: 36.67, b3: 43.08, b4: 55.56, b5: 53.38 },
+            { nim: "2511701049", name: "REVA FATIA AZIZ", b1: 31.97, b2: 24.67, b3: 40.77, b4: 46.67, b5: 40.54 },
+            { nim: "2511701050", name: "TALITA BELLISYA BHATARI RINDYA", b1: 43.54, b2: 25.33, b3: 37.70, b4: 44.45, b5: 43.25 }
+        ];
+
+        // OVERRIDE DATA PDF ASLI (Diambil presisi dari ketikan user)
+        // Jika nilainya murni dan sama dengan raw, script akan mendeteksinya sebagai murni
+        const exactRemediData = {
+            "2511701001": { b1_rem: 60.00, b2_rem: 36.00, b3_rem: 47.00, b4_rem: 67.14 },
+            "2511701002": { b1_rem: 64.00, b2_rem: 59.00, b3_rem: 62.00, b4_rem: 70.00 },
+            "2511701003": { b1_rem: 63.94, b2_rem: 64.67, b3_rem: 63.08, b4_rem: 81.11 },
+            "2511701004": { b1_rem: 70.00, b2_rem: 70.00, b3_rem: 40.00, b4_rem: 70.00 },
+            "2511701005": { b1_rem: 70.00, b2_rem: 65.00, b3_rem: 53.85, b4_rem: 60.00 },
+            "2511701006": { b1_rem: 60.54, b2_rem: 62.00, b3_rem: 70.00, b4_rem: 67.78 },
+            "2511701007": { b1_rem: 66.00, b2_rem: 55.00, b3_rem: 64.00, b4_rem: 70.00 },
+            "2511701008": { b1_rem: 70.00, b2_rem: 52.00, b3_rem: 54.00, b4_rem: 70.00 },
+            "2511701009": { b1_rem: 69.00, b2_rem: 70.00, b3_rem: 70.00, b4_rem: 70.00 },
+            "2511701010": { b1_rem: 64.00, b2_rem: 49.00, b3_rem: 68.00, b4_rem: 70.00 },
+            "2511701011": { b1_rem: 68.00, b2_rem: 70.00, b3_rem: 59.00, b4_rem: 70.00 },
+            "2511701012": { b1_rem: 62.00, b2_rem: 70.00, b3_rem: 67.00, b4_rem: 70.00 },
+            "2511701013": { b1_rem: 70.00, b2_rem: 61.33, b3_rem: 76.15, b4_rem: 84.44 },
+            "2511701014": { b1_rem: 70.00, b2_rem: 70.00, b3_rem: 49.00, b4_rem: 70.00 },
+            "2511701015": { b1_rem: 70.00, b2_rem: 43.00, b3_rem: 63.00, b4_rem: 70.00 },
+            "2511701016": { b1_rem: 65.00, b2_rem: 65.00, b3_rem: 52.00, b4_rem: 60.00 },
+            "2511701017": { b1_rem: 64.00, b2_rem: 58.00, b3_rem: 64.00, b4_rem: 70.00 },
+            "2511701018": { b1_rem: 70.00, b2_rem: 67.00, b3_rem: 65.00, b4_rem: 73.34 },
+            "2511701019": { b1_rem: 65.00, b2_rem: 51.00, b3_rem: 54.00, b4_rem: 70.00 },
+            "2511701020": { b1_rem: 70.00, b2_rem: 70.00, b3_rem: 49.24, b4_rem: 35.56 },
+            "2511701021": { b1_rem: 57.00, b2_rem: 35.00, b3_rem: 57.00, b4_rem: 68.57 },
+            "2511701022": { b1_rem: 70.00, b2_rem: 62.00, b3_rem: 71.54, b4_rem: 76.67 },
+            "2511701023": { b1_rem: 60.00, b2_rem: 64.00, b3_rem: 56.00, b4_rem: 70.00 },
+            "2511701024": { b1_rem: 70.00, b2_rem: 46.00, b3_rem: 51.00, b4_rem: 68.57 },
+            "2511701025": { b1_rem: 70.00, b2_rem: 64.00, b3_rem: 70.00, b4_rem: 76.67 },
+            "2511701026": { b1_rem: 76.87, b2_rem: 76.67, b3_rem: 81.54, b4_rem: 91.11 },
+            "2511701027": { b1_rem: 70.00, b2_rem: 64.00, b3_rem: 67.00, b4_rem: 74.45 },
+            "2511701028": { b1_rem: 60.00, b2_rem: 54.00, b3_rem: 56.00, b4_rem: 70.00 },
+            "2511701029": { b1_rem: 66.00, b2_rem: 62.00, b3_rem: 59.00, b4_rem: 70.00 },
+            "2511701030": { b1_rem: 43.00, b2_rem: 36.00, b3_rem: 49.00, b4_rem: 60.00 },
+            "2511701031": { b1_rem: 69.00, b2_rem: 61.00, b3_rem: 67.69, b4_rem: 84.44 },
+            "2511701032": { b1_rem: 63.00, b2_rem: 56.00, b3_rem: 53.00, b4_rem: 66.66 },
+            "2511701033": { b1_rem: 70.75, b2_rem: 72.66, b3_rem: 83.85, b4_rem: 91.11 },
+            "2511701034": { b1_rem: 66.00, b2_rem: 57.00, b3_rem: 66.00, b4_rem: 70.00 },
+            "2511701035": { b1_rem: 61.00, b2_rem: 51.00, b3_rem: 62.00, b4_rem: 70.00 },
+            "2511701036": { b1_rem: 57.00, b2_rem: 48.00, b3_rem: 49.00, b4_rem: 67.14 },
+            "2511701037": { b1_rem: 60.00, b2_rem: 54.00, b3_rem: 70.00, b4_rem: 70.00 },
+            "2511701038": { b1_rem: 79.59, b2_rem: 75.33, b3_rem: 80.77, b4_rem: 90.00 },
+            "2511701039": { b1_rem: 56.00, b2_rem: 42.00, b3_rem: 48.00, b4_rem: 70.00 },
+            "2511701040": { b1_rem: 61.23, b2_rem: 70.00, b3_rem: 66.92, b4_rem: 78.89 },
+            "2511701041": { b1_rem: 64.00, b2_rem: 62.00, b3_rem: 58.00, b4_rem: 70.00 },
+            "2511701042": { b1_rem: 63.00, b2_rem: 59.00, b3_rem: 70.00, b4_rem: 73.34 },
+            "2511701043": { b1_rem: 63.00, b2_rem: 43.00, b3_rem: 54.00, b4_rem: 70.00 },
+            "2511701044": { b1_rem: 70.00, b2_rem: 52.00, b3_rem: 67.00, b4_rem: 70.00 },
+            "2511701045": { b1_rem: 57.00, b2_rem: 50.00, b3_rem: 59.00, b4_rem: 70.00 },
+            "2511701046": { b1_rem: 67.00, b2_rem: 62.00, b3_rem: 54.00, b4_rem: 70.00 },
+            "2511701047": { b1_rem: 67.00, b2_rem: 40.00, b3_rem: 57.00, b4_rem: 70.00 },
+            "2511701048": { b1_rem: 67.00, b2_rem: 51.00, b3_rem: 62.00, b4_rem: 70.00 },
+            "2511701049": { b1_rem: 40.00, b2_rem: 28.00, b3_rem: 48.00, b4_rem: 70.00 },
+            "2511701050": { b1_rem: 70.00, b2_rem: 32.00, b3_rem: 50.00, b4_rem: 67.14 }
+        };
+        
+        // Cari Nilai Tertinggi & Terendah per Blok (Dari nilai ASLI/MURNI)
+        const maxB1 = Math.max(...rawData.map(s => s.b1));
+        const minB1 = Math.min(...rawData.map(s => s.b1));
+        const maxB2 = Math.max(...rawData.map(s => s.b2));
+        const minB2 = Math.min(...rawData.map(s => s.b2));
+        const maxB3 = Math.max(...rawData.map(s => s.b3));
+        const minB3 = Math.min(...rawData.map(s => s.b3));
+        const maxB4 = Math.max(...rawData.map(s => s.b4));
+        const minB4 = Math.min(...rawData.map(s => s.b4));
+        const maxB5 = Math.max(...rawData.map(s => s.b5));
+        const minB5 = Math.min(...rawData.map(s => s.b5));
+
+        // Hitung rata-rata dan deteksi otomatis status Remedial
+        let students = rawData.map(d => {
+            const overrides = exactRemediData[d.nim] || {};
+            
+            // Langsung pakai nilai dari ketikan user (Jika tidak ada error, fallback ke data murni)
+            const b1_rem = overrides.b1_rem !== undefined ? overrides.b1_rem : d.b1;
+            const b2_rem = overrides.b2_rem !== undefined ? overrides.b2_rem : d.b2;
+            const b3_rem = overrides.b3_rem !== undefined ? overrides.b3_rem : d.b3;
+            const b4_rem = overrides.b4_rem !== undefined ? overrides.b4_rem : d.b4;
+            const b5_rem = overrides.b5_rem !== undefined ? overrides.b5_rem : d.b5; // Blok 5 udah masuk pantauan
+
+            const avg = parseFloat(((d.b1 + d.b2 + d.b3 + d.b4 + d.b5) / 5).toFixed(2));
+            const avg_rem = parseFloat(((b1_rem + b2_rem + b3_rem + b4_rem + b5_rem) / 5).toFixed(2));
+            
+            // LOGIKA BARU: Remedial terjadi jika nilai asli < KKM ATAU nilainya beda
+            const isRem_b1 = (d.b1 < NILAI_KKM) || (b1_rem !== d.b1);
+            const isRem_b2 = (d.b2 < NILAI_KKM) || (b2_rem !== d.b2);
+            const isRem_b3 = (d.b3 < NILAI_KKM) || (b3_rem !== d.b3);
+            const isRem_b4 = (d.b4 < NILAI_KKM) || (b4_rem !== d.b4);
+            const isRem_b5 = (d.b5 < NILAI_KKM) || (b5_rem !== d.b5); 
+            
+            let remedialCount = [isRem_b1, isRem_b2, isRem_b3, isRem_b4, isRem_b5].filter(Boolean).length;
+            
+            const isTopB5 = d.b5 === maxB5;
+            const isBottomB5 = d.b5 === minB5;
+
+            let topBlocks = [];
+            if(d.b1 === maxB1) topBlocks.push(1);
+            if(d.b2 === maxB2) topBlocks.push(2);
+            if(d.b3 === maxB3) topBlocks.push(3);
+            if(d.b4 === maxB4) topBlocks.push(4);
+
+            let bottomBlocks = [];
+            if(d.b1 === minB1) bottomBlocks.push(1);
+            if(d.b2 === minB2) bottomBlocks.push(2);
+            if(d.b3 === minB3) bottomBlocks.push(3);
+            if(d.b4 === minB4) bottomBlocks.push(4);
+            
+            return { ...d, avg, avg_rem, b1_rem, b2_rem, b3_rem, b4_rem, b5_rem, 
+                     isRem_b1, isRem_b2, isRem_b3, isRem_b4, isRem_b5, 
+                     remedialCount, isTopB5, isBottomB5, topBlocks, bottomBlocks };
+        });
+        
+        // Leaderboard utama selalu berpatokan pada RATA-RATA ASLI (Murni)
+        students.sort((a, b) => b.avg - a.avg);
+
+        const allAvgs = students.map(s => s.avg);
+        const mean = allAvgs.reduce((sum, val) => sum + val, 0) / students.length;
+        const stdDev = Math.sqrt(allAvgs.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / students.length);
+        
+        document.getElementById('stat-mean').textContent = mean.toFixed(2);
+        document.getElementById('stat-sd').textContent = stdDev.toFixed(2);
+        document.getElementById('stat-max').textContent = Math.max(...allAvgs).toFixed(2);
+        document.getElementById('stat-min').textContent = Math.min(...allAvgs).toFixed(2);
+
+        // Hitung Rata-rata & Std Deviasi PER BLOK untuk garis tren grafik (berdasarkan Murni)
+        const meanB1 = students.reduce((sum, s) => sum + s.b1, 0) / students.length;
+        const meanB2 = students.reduce((sum, s) => sum + s.b2, 0) / students.length;
+        const meanB3 = students.reduce((sum, s) => sum + s.b3, 0) / students.length;
+        const meanB4 = students.reduce((sum, s) => sum + s.b4, 0) / students.length;
+        const meanB5 = students.reduce((sum, s) => sum + s.b5, 0) / students.length;
+
+        const stdB1 = Math.sqrt(students.reduce((sum, s) => sum + Math.pow(s.b1 - meanB1, 2), 0) / students.length);
+        const stdB2 = Math.sqrt(students.reduce((sum, s) => sum + Math.pow(s.b2 - meanB2, 2), 0) / students.length);
+        const stdB3 = Math.sqrt(students.reduce((sum, s) => sum + Math.pow(s.b3 - meanB3, 2), 0) / students.length);
+        const stdB4 = Math.sqrt(students.reduce((sum, s) => sum + Math.pow(s.b4 - meanB4, 2), 0) / students.length);
+        const stdB5 = Math.sqrt(students.reduce((sum, s) => sum + Math.pow(s.b5 - meanB5, 2), 0) / students.length);
+
+        const meansPerBlock = [meanB1, meanB2, meanB3, meanB4, meanB5];
+        const upperStdPerBlock = [meanB1 + stdB1, meanB2 + stdB2, meanB3 + stdB3, meanB4 + stdB4, meanB5 + stdB5];
+        const lowerStdPerBlock = [meanB1 - stdB1, meanB2 - stdB2, meanB3 - stdB3, meanB4 - stdB4, meanB5 - stdB5];
+
+        // Update Logika Pemberian Gelar
+        students = students.map((s, index) => {
+            s.zScore = (s.avg - mean) / stdDev;
+            const rank = index + 1;
+
+            if (rank <= 3) {
+                s.gelar = { title: 'Elite Achiever', icon: 'fa-crown', color: 'bg-emerald-100 text-emerald-800', border: 'border-emerald-300' };
+                s.chartColor = '#10b981'; // Emerald
+            } else if (rank <= 10) {
+                s.gelar = { title: 'Top Scholar', icon: 'fa-star', color: 'bg-blue-100 text-blue-800', border: 'border-blue-300' };
+                s.chartColor = '#3b82f6'; // Blue
+            } else if (s.zScore >= -0.5) {
+                s.gelar = { title: 'Solid Performer', icon: 'fa-check-circle', color: 'bg-yellow-100 text-yellow-800', border: 'border-yellow-400' };
+                s.chartColor = '#facc15'; // Yellow
+            } else if (s.zScore >= -1.5) {
+                s.gelar = { title: 'Striver', icon: 'fa-arrow-up', color: 'bg-orange-100 text-orange-800', border: 'border-orange-300' };
+                s.chartColor = '#f97316'; // Orange
+            } else {
+                s.gelar = { title: 'Critical Focus', icon: 'fa-exclamation-triangle', color: 'bg-red-100 text-red-800', border: 'border-red-300' };
+                s.chartColor = '#ef4444'; // Red
+            }
+            return s;
+        });
+
+        // =====================================
+        // RENDER MAIN CHART
+        // =====================================
+        const mainChart = new Chart(document.getElementById('mainChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: students.map(s => s.name.split(' ')[0] + ' ' + (s.name.split(' ')[1] || '')),
+                datasets: [
+                    { label: 'Nilai Rata-rata Murni', data: students.map(s => s.avg), backgroundColor: students.map(s => s.chartColor), borderRadius: 4, barPercentage: 0.8, order: 2 },
+                    { label: 'Mean (\u03BC)', data: students.map(() => mean), type: 'line', borderColor: '#94a3b8', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, pointHitRadius: 15, pointHoverRadius: 5, fill: false, order: 1 },
+                    { label: '\u03BC + 1\u03C3', data: students.map(() => mean + stdDev), type: 'line', borderColor: '#60a5fa', borderWidth: 1, borderDash: [3, 3], pointRadius: 0, pointHitRadius: 15, pointHoverRadius: 5, fill: false, order: 1 },
+                    { label: '\u03BC - 1\u03C3', data: students.map(() => mean - stdDev), type: 'line', borderColor: '#fb923c', borderWidth: 1, borderDash: [3, 3], pointRadius: 0, pointHitRadius: 15, pointHoverRadius: 5, fill: false, order: 1 },
+                    { label: 'KKM', data: students.map(() => NILAI_KKM), type: 'line', borderColor: '#dc2626', borderWidth: 2, borderDash: [4, 4], pointRadius: 0, pointHitRadius: 15, pointHoverRadius: 5, fill: false, order: 1 }
+                ]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                interaction: { mode: 'nearest', intersect: true },
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 12, titleFont: { size: 14, family: "'Inter', sans-serif" }, bodyFont: { size: 13, family: "'Inter', sans-serif" },
+                        callbacks: {
+                            title: function(context) { if (context[0].datasetIndex !== 0) return ''; return context[0].label; },
+                            label: function(context) {
+                                let label = context.dataset.label || ''; let value = context.parsed.y;
+                                if (context.datasetIndex === 0) { const s = students[context.dataIndex]; return `📊 Rata-rata Murni: ${value.toFixed(2)} (Z: ${s.zScore > 0 ? '+' : ''}${s.zScore.toFixed(2)})`; } 
+                                else if (label.includes('Mean')) return `📈 Rata-rata Murni Kelas (\u03BC): ${value.toFixed(2)}`;
+                                else if (label.includes('+ 1\u03C3')) return `🛡️ Batas Atas (+1\u03C3): ${value.toFixed(2)}`;
+                                else if (label.includes('- 1\u03C3')) return `⚠️ Batas Bawah (-1\u03C3): ${value.toFixed(2)}`;
+                                else if (label === 'KKM') return `🎯 Batas KKM (Lulus): ${value.toFixed(2)}`;
+                                return `${label}: ${value.toFixed(2)}`;
+                            }
+                        }
+                    }
+                }, 
+                scales: { 
+                    y: { min: 0, max: 100, ticks: { stepSize: 10, autoSkip: false } },
+                    x: { grid: { display: false }, ticks: { autoSkip: false, font: { size: 10 }, maxRotation: 45, minRotation: 45 } }
+                } 
+            }
+        });
+
+        // Populate Grid
+        const grid = document.getElementById('studentGrid');
+        function renderGrid(dataToRender) {
+            grid.innerHTML = '';
+            dataToRender.forEach((s, index) => {
+                const card = document.createElement('div');
+                card.className = `bg-white rounded-xl shadow-sm border ${s.gelar.border} p-5 cursor-pointer hover:shadow-md transition-all transform hover:-translate-y-1 flex flex-col h-full relative`;
+                card.onclick = () => openModal(s);
+                
+                // Construct Badges (Including Historical)
+                let badgeList = [];
+                if (s.isTopB5) badgeList.push(`<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-[10px] font-bold border border-amber-300" title="Tertinggi di Blok 5"><i class="fas fa-trophy"></i> Top B5</span>`);
+                if (s.topBlocks.length > 0) badgeList.push(`<span class="bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded text-[10px] font-bold border border-yellow-200" title="Pernah Tertinggi"><i class="fas fa-medal"></i> Top B${s.topBlocks.join(',')}</span>`);
+                if (s.isBottomB5) badgeList.push(`<span class="bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-[10px] font-bold border border-slate-300" title="Terendah di Blok 5"><i class="fas fa-arrow-down"></i> Low B5</span>`);
+                if (s.bottomBlocks.length > 0) badgeList.push(`<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold border border-gray-200" title="Pernah Terendah"><i class="fas fa-level-down-alt"></i> Low B${s.bottomBlocks.join(',')}</span>`);
+                
+                // Logika Penambahan Badge Bebas Remedi vs Remedi xN
+                if (s.remedialCount > 0) {
+                    badgeList.push(`<span class="bg-rose-100 text-rose-700 px-2 py-0.5 rounded text-[10px] font-bold border border-rose-200" title="Pernah Remedial (Sumbang Kampus)"><i class="fas fa-briefcase-medical"></i> Remedi x${s.remedialCount}</span>`);
+                } else {
+                    // Badge khusus yang ga pernah remedial
+                    badgeList.push(`<span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-[10px] font-bold border border-indigo-200" title="Tidak Pernah Remedial Sama Sekali"><i class="fas fa-shield-alt"></i> Bebas Remedi</span>`);
+                }
+
+                const badgesHtml = badgeList.length > 0 ? `<div class="flex flex-wrap gap-1 mt-2 mb-2">${badgeList.join('')}</div>` : '';
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="${s.gelar.color} px-2 py-1 rounded text-xs font-bold flex items-center gap-1"><i class="fas ${s.gelar.icon}"></i> ${s.gelar.title}</div>
+                        <div class="text-xs font-semibold text-slate-400">#${index + 1}</div>
+                    </div>
+                    <h4 class="font-bold text-slate-800 leading-tight mb-1 truncate">${s.name}</h4>
+                    <p class="text-sm font-mono text-slate-500 mb-1">${s.nim}</p>
+                    ${badgesHtml}
+                    <!-- mt-auto memastikan blok bawah ini selalu di dasar kartu secara sejajar rata -->
+                    <div class="flex justify-between items-end border-t border-slate-100 pt-3 mt-auto">
+                        <div><p class="text-[10px] uppercase font-bold text-slate-400">Rata-rata</p><p class="text-lg font-black" style="color: ${s.chartColor}">${s.avg.toFixed(2)}</p></div>
+                        <div class="text-right"><p class="text-[10px] uppercase font-bold text-slate-400">Z-Score</p><p class="text-sm font-bold text-slate-600">${s.zScore > 0 ? '+' : ''}${s.zScore.toFixed(2)}</p></div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        renderGrid(students);
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            renderGrid(students.filter(s => s.name.toLowerCase().includes(term) || s.nim.includes(term)));
+        });
+
+        const modal = document.getElementById('studentModal');
+        let studentChartInstance = null;
+        let activeStudent = null; // Menyimpan referensi mahasiswa yang sedang dibuka
+        
+        function openModal(student) {
+            activeStudent = student; // Simpan ke global scope agar bisa diakses tooltip
+
+            document.getElementById('modalName').textContent = student.name;
+            document.getElementById('modalNim').textContent = `NIM: ${student.nim}`;
+            document.getElementById('modalAvg').textContent = student.avg.toFixed(2);
+            document.getElementById('modalAvg').style.color = student.chartColor;
+            document.getElementById('avgLabel').textContent = "Rata-rata Asli (Murni)";
+            
+            // Atur Lencana Spesial di Modal
+            const modalBadges = document.getElementById('modalBadges');
+            let modalBadgeHtml = '';
+            if(student.isTopB5) modalBadgeHtml += `<span class="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded border border-amber-300 flex items-center gap-1 w-max shadow-sm"><i class="fas fa-trophy"></i> Nilai Tertinggi Blok 5</span>`;
+            if(student.topBlocks.length > 0) modalBadgeHtml += `<span class="bg-yellow-50 text-yellow-700 text-xs px-2 py-1 rounded border border-yellow-200 flex items-center gap-1 w-max shadow-sm"><i class="fas fa-medal"></i> Nilai Tertinggi Blok ${student.topBlocks.join(', ')}</span>`;
+            if(student.isBottomB5) modalBadgeHtml += `<span class="bg-slate-200 text-slate-700 text-xs px-2 py-1 rounded border border-slate-300 flex items-center gap-1 w-max shadow-sm"><i class="fas fa-arrow-down"></i> Nilai Terendah Blok 5</span>`;
+            if(student.bottomBlocks.length > 0) modalBadgeHtml += `<span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded border border-gray-200 flex items-center gap-1 w-max shadow-sm"><i class="fas fa-level-down-alt"></i> Nilai Terendah Blok ${student.bottomBlocks.join(', ')}</span>`;
+            
+            // Logika Penambahan Badge Bebas Remedi vs Remedi xN
+            if(student.remedialCount > 0) {
+                modalBadgeHtml += `<span class="bg-rose-100 text-rose-700 text-xs px-2 py-1 rounded border border-rose-200 flex items-center gap-1 w-max shadow-sm"><i class="fas fa-briefcase-medical"></i> Total Remedi: ${student.remedialCount}x</span>`;
+            } else {
+                modalBadgeHtml += `<span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded border border-indigo-200 flex items-center gap-1 w-max shadow-sm"><i class="fas fa-shield-alt"></i> 100% Lulus Murni (Bebas Remedi)</span>`;
+            }
+
+            modalBadges.innerHTML = modalBadgeHtml;
+
+            const badge = document.getElementById('modalTitleBadge');
+            badge.className = `inline-flex items-center gap-2 mt-1 px-4 py-2 rounded-full font-bold text-sm shadow-sm ${student.gelar.color} border ${student.gelar.border}`;
+            badge.innerHTML = `<i class="fas ${student.gelar.icon}"></i> ${student.gelar.title}`;
+            document.getElementById('modalZScoreDesc').textContent = `Z-Score: ${student.zScore.toFixed(2)}`;
+
+            // Tampilkan Toggle HANYA JIKA pernah remedial
+            const toggleContainer = document.getElementById('remedialToggleContainer');
+            const toggleInput = document.getElementById('remedialToggle');
+            toggleInput.checked = false; // reset
+            
+            if (student.remedialCount > 0) {
+                toggleContainer.classList.remove('hidden');
+                toggleInput.onchange = (e) => updateModalView(student, e.target.checked);
+            } else {
+                toggleContainer.classList.add('hidden');
+            }
+
+            // Set Data Angka Kotak-Kotak Bawah
+            ['b1','b2','b3','b4','b5'].forEach(b => {
+                document.getElementById('modal'+b.toUpperCase()).textContent = student[b].toFixed(2);
+            });
+
+            // =====================================
+            // RENDER MODAL CHART (STUDENT SPECIFIC)
+            // =====================================
+            const ctx = document.getElementById('studentChart').getContext('2d');
+            if (studentChartInstance) studentChartInstance.destroy();
+            studentChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Blok 1', 'Blok 2', 'Blok 3', 'Blok 4', 'Blok 5'],
+                    datasets: [
+                        { 
+                            label: 'Nilai Mahasiswa', 
+                            data: [student.b1, student.b2, student.b3, student.b4, student.b5], 
+                            borderColor: student.chartColor, 
+                            backgroundColor: student.chartColor + '33', 
+                            borderWidth: 3, 
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: student.chartColor,
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        },
+                        { 
+                            label: 'Mean (\u03BC) per Blok', 
+                            data: meansPerBlock, 
+                            borderColor: '#94a3b8', 
+                            borderWidth: 2, 
+                            borderDash: [5, 5], 
+                            pointRadius: 3, 
+                            pointHitRadius: 15,
+                            pointHoverRadius: 5,
+                            fill: false
+                        },
+                        { 
+                            label: '\u03BC + 1\u03C3 (per Blok)', 
+                            data: upperStdPerBlock, 
+                            borderColor: '#60a5fa', 
+                            borderWidth: 1, 
+                            borderDash: [3, 3], 
+                            pointRadius: 3, 
+                            pointHitRadius: 15,
+                            pointHoverRadius: 5,
+                            fill: false
+                        },
+                        { 
+                            label: '\u03BC - 1\u03C3 (per Blok)', 
+                            data: lowerStdPerBlock, 
+                            borderColor: '#fb923c', 
+                            borderWidth: 1, 
+                            borderDash: [3, 3], 
+                            pointRadius: 3, 
+                            pointHitRadius: 15,
+                            pointHoverRadius: 5,
+                            fill: false
+                        },
+                        { 
+                            label: 'Batas KKM', 
+                            data: [NILAI_KKM, NILAI_KKM, NILAI_KKM, NILAI_KKM, NILAI_KKM], 
+                            borderColor: '#dc2626', 
+                            borderWidth: 2, 
+                            borderDash: [5, 5], 
+                            pointRadius: 0, 
+                            pointHitRadius: 15,
+                            pointHoverRadius: 5,
+                            fill: false
+                        }
+                    ]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    interaction: { mode: 'nearest', intersect: true },
+                    plugins: { 
+                        legend: { display: true, position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 12,
+                            callbacks: {
+                                title: function(context) { if (context[0].datasetIndex > 1) return ''; return context[0].label; },
+                                label: function(context) {
+                                    let label = context.dataset.label || ''; 
+                                    let value = context.parsed.y;
+                                    
+                                    // Pengecekan cerdas untuk membedakan nilai yang murni vs yang beneran ngulang
+                                    if (label === 'Nilai Mahasiswa' || label === 'Nilai Asli EB (Pre-Remedi)') {
+                                        return `📘 Nilai Capaian Blok: ${value.toFixed(2)}`;
+                                    } 
+                                    else if (label === 'Nilai Setelah Remedial') {
+                                        let bIdx = context.dataIndex + 1;
+                                        let isRemBlok = activeStudent['isRem_b' + bIdx];
+                                        
+                                        // JIKA NILAINYA MURNI (Bukan remedial), jangan tulis pasca remedial!
+                                        if (!isRemBlok) {
+                                            return `📘 Nilai Capaian Blok (Murni): ${value.toFixed(2)}`;
+                                        } else {
+                                            let rawVal = activeStudent['b' + bIdx];
+                                            let remVal = activeStudent['b' + bIdx + '_rem'];
+                                            if (rawVal === remVal) {
+                                                return bIdx === 5 ? `⏳ Status Wajib Remedial (Belum Ujian): ${value.toFixed(2)}` : `⚠️ Remedial (Gagal Naik Nilai): ${value.toFixed(2)}`;
+                                            }
+                                            return `✨ Nilai Pasca-Remedial: ${value.toFixed(2)}`;
+                                        }
+                                    } 
+                                    else if (label === 'Nilai Jatuh EB (Dosa)') {
+                                        return `❌ Nilai Asli EB (Dosa): ${value.toFixed(2)}`;
+                                    }
+                                    else if (label.includes('Mean')) return `📈 Rata-rata Kelas Blok Ini: ${value.toFixed(2)}`;
+                                    else if (label.includes('+ 1\u03C3')) return `🛡️ Batas Atas Blok Ini (+1\u03C3): ${value.toFixed(2)}`;
+                                    else if (label.includes('- 1\u03C3')) return `⚠️ Batas Bawah Blok Ini (-1\u03C3): ${value.toFixed(2)}`;
+                                    else if (label === 'Batas KKM') return `🎯 Batas KKM Lulus: ${value.toFixed(2)}`;
+                                    
+                                    return `${label}: ${value.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: { y: { min: 0, max: 100, ticks: { stepSize: 10, autoSkip: false } } } 
+                }
+            });
+
+            modal.classList.remove('hidden');
+            setTimeout(() => { document.getElementById('modalOverlay').classList.add('opacity-100'); modal.querySelector('.transform').classList.add('modal-enter-active'); }, 10);
+        }
+
+        function closeModalDialog() {
+            document.getElementById('modalOverlay').classList.remove('opacity-100');
+            const panel = modal.querySelector('.transform');
+            panel.classList.add('modal-leave-active');
+            setTimeout(() => { modal.classList.add('hidden'); panel.classList.remove('modal-leave-active'); }, 300);
+        }
+
+        // Logic Visual Effect saat Toggle Remedial Ditekan
+        function updateModalView(student, isRemedial) {
+            document.getElementById('modalAvg').textContent = isRemedial ? student.avg_rem.toFixed(2) : student.avg.toFixed(2);
+            document.getElementById('avgLabel').textContent = isRemedial ? "Rata-rata Terselamatkan (Remedi)" : "Rata-rata Asli (Murni)";
+            document.getElementById('modalAvg').style.color = isRemedial ? '#059669' : student.chartColor;
+
+            ['b1','b2','b3','b4','b5'].forEach((b, idx) => {
+                const raw = student[b];
+                const rem = student[b + '_rem'];
+                const isRemBlok = student['isRem_b' + (idx + 1)]; // Mengambil status remedial spesifik blok ini
+                const el = document.getElementById('modal' + b.toUpperCase());
+                
+                // Efek Coret Merah KHUSUS buat blok yang beneran ngalamin remedial
+                if (isRemedial && isRemBlok) {
+                    if (raw !== rem) {
+                        // Remedial sukses nambah nilai
+                        el.innerHTML = `<span class="line-through text-red-400 text-xs mr-2">${raw.toFixed(2)}</span><span class="text-emerald-600 font-black">${rem.toFixed(2)}</span>`;
+                    } else {
+                        // Remedial tapi gagal nambah nilai atau belum ujian
+                        const titleTxt = (idx === 4) ? "Belum Ujian Remedial" : "Remedial gagal naik nilai";
+                        el.innerHTML = `<span class="line-through text-red-400 text-xs mr-2">${raw.toFixed(2)}</span><span class="text-orange-500 font-black" title="${titleTxt}">${rem.toFixed(2)}</span>`;
+                    }
+                } else {
+                    el.textContent = raw.toFixed(2);
+                }
+            });
+
+            if (studentChartInstance) {
+                // Bersihkan dataset bayangan (index 1) kalau ada
+                if (studentChartInstance.data.datasets.length === 6) {
+                    studentChartInstance.data.datasets.splice(1, 1);
+                }
+
+                if (isRemedial) {
+                    // Garis utama naik jadi hijau (Hasil Remedi)
+                    studentChartInstance.data.datasets[0].data = [student.b1_rem, student.b2_rem, student.b3_rem, student.b4_rem, student.b5_rem];
+                    studentChartInstance.data.datasets[0].label = 'Nilai Setelah Remedial';
+                    studentChartInstance.data.datasets[0].borderColor = '#10b981'; // emerald
+                    studentChartInstance.data.datasets[0].backgroundColor = '#10b98133';
+                    studentChartInstance.data.datasets[0].pointBackgroundColor = '#10b981';
+                    
+                    // Garis bayangan merah di bawahnya TAPI HANYA buat blok yang berstatus isRem_bX (Beneran ikut remedi)
+                    const shadowData = [
+                        student.isRem_b1 ? student.b1 : null,
+                        student.isRem_b2 ? student.b2 : null,
+                        student.isRem_b3 ? student.b3 : null,
+                        student.isRem_b4 ? student.b4 : null,
+                        student.isRem_b5 ? student.b5 : null
+                    ];
+
+                    studentChartInstance.data.datasets.splice(1, 0, {
+                        label: 'Nilai Jatuh EB (Dosa)',
+                        data: shadowData,
+                        borderColor: '#fca5a5',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 6,
+                        pointBackgroundColor: '#ef4444',
+                        fill: false,
+                        tension: 0,
+                        spanGaps: false // PENTING: Memastikan garis merah gak nyambung ke titik yang nilainya murni
+                    });
+                } else {
+                    // Balik ke mode Murni
+                    studentChartInstance.data.datasets[0].data = [student.b1, student.b2, student.b3, student.b4, student.b5];
+                    studentChartInstance.data.datasets[0].label = 'Nilai Mahasiswa';
+                    studentChartInstance.data.datasets[0].borderColor = student.chartColor;
+                    studentChartInstance.data.datasets[0].backgroundColor = student.chartColor + '33';
+                    studentChartInstance.data.datasets[0].pointBackgroundColor = student.chartColor;
+                }
+                studentChartInstance.update();
+            }
+        }
+
+        document.getElementById('closeModalBtn').onclick = closeModalDialog;
+        document.getElementById('modalOverlay').onclick = closeModalDialog;
+
+        // ==========================================
+        // GROQ AI CHATBOT LOGIC
+        // ==========================================
+        const fabChat = document.getElementById('fab-chat');
+        const aiSidebar = document.getElementById('ai-sidebar');
+        const btnCloseChat = document.getElementById('btn-close-chat');
+        const mainContent = document.getElementById('main-content');
+        
+        const chatHistory = document.getElementById('chat-history');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const btnSend = document.getElementById('btn-send');
+
+        let isChatOpen = false;
+
+        function toggleChat() {
+            isChatOpen = !isChatOpen;
+            if(isChatOpen) {
+                aiSidebar.classList.remove('translate-x-full');
+                if(window.innerWidth >= 768) { mainContent.style.paddingRight = '450px'; }
+            } else {
+                aiSidebar.classList.add('translate-x-full');
+                mainContent.style.paddingRight = '0px';
+            }
+        }
+
+        fabChat.addEventListener('click', toggleChat);
+        btnCloseChat.addEventListener('click', toggleChat);
+
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            if(this.value.trim() !== '') {
+                btnSend.removeAttribute('disabled');
+            } else {
+                btnSend.setAttribute('disabled', 'true');
+            }
+        });
+
+        const contextData = students.map((s, i) => ({
+            rank: i+1, nama: s.name, rata2_murni: s.avg, rata2_remedi: s.avg_rem, b1: s.b1, b2: s.b2, b3: s.b3, b4: s.b4, b5: s.b5, remedialCount: s.remedialCount
+        }));
+
+        const SYSTEM_PROMPT = `Kamu adalah "Gemini Academic Pro", asisten AI cerdas untuk mahasiswa Kedokteran UNISA.
+Tugas utamamu: Menganalisis data, membandingkan ranking, dan menghitung target nilai.
+Gaya bicara: Gaul, asik, supportif, menggunakan kata sapaan "bro/sis", analitis layaknya dewa statistik dan ahli strategi belajar.
+
+SITUASI SAAT INI:
+- Mahasiswa memiliki total 30 BLOK sebelum lulus.
+- Saat ini telah selesai Blok 5. (Sisa 25 blok lagi).
+- Nilai KKM / Kelulusan adalah 60.
+- Info tambahan: Ada toggle visual before-after remedial sekarang di UI.
+
+DATA MAHASISWA (Top 50):
+${JSON.stringify(contextData)}
+
+Instruksi tambahan: Berikan hitungan akurat. Jangan halusinasi data. Gunakan format Markdown.`;
+
+        let conversationHistory = [{ role: "system", content: SYSTEM_PROMPT }];
+
+        function appendMessage(role, content) {
+            const div = document.createElement('div');
+            div.className = `flex items-start gap-3 ${role === 'user' ? 'flex-row-reverse' : ''}`;
+            
+            let iconHtml = role === 'user' 
+                ? `<div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0"><i class="fas fa-user text-slate-500"></i></div>`
+                : (role === 'system' ? `<div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center shrink-0"><i class="fas fa-cog text-yellow-600"></i></div>` : `<div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0"><i class="fas fa-robot text-indigo-600"></i></div>`);
+
+            const bubbleClass = role === 'user' 
+                ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-none px-4 py-3 shadow-sm text-sm max-w-[85%]'
+                : (role === 'system' ? 'bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-2xl px-4 py-3 text-xs w-full text-center' : 'bg-white border border-slate-200 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm text-sm text-slate-700 max-w-[85%] markdown-body');
+
+            div.innerHTML = `${role !== 'system' ? iconHtml : ''}<div class="${bubbleClass}"></div>`;
+            chatHistory.appendChild(div);
+            
+            const textContainer = div.lastElementChild;
+            if (role === 'assistant') { textContainer.innerHTML = marked.parse(content || ' '); } 
+            else { textContainer.innerHTML = (content || ' ').replace(/\n/g, '<br>'); }
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        function appendLoading() {
+            const div = document.createElement('div');
+            div.id = 'loading-bubble';
+            div.className = `flex items-start gap-3`;
+            div.innerHTML = `<div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0"><i class="fas fa-robot text-indigo-600"></i></div><div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-5 py-4 shadow-sm max-w-[85%] flex items-center justify-center"><div class="dot-flashing"></div></div>`;
+            chatHistory.appendChild(div);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        function removeLoading() {
+            const loader = document.getElementById('loading-bubble');
+            if(loader) loader.remove();
+        }
+
+        async function fetchGroq(message) {
+            appendMessage('user', message);
+            conversationHistory.push({ role: "user", content: message });
+            chatInput.value = ''; chatInput.style.height = 'auto'; btnSend.setAttribute('disabled', 'true');
+            appendLoading();
+
+            try {
+                const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: conversationHistory }) });
+                if(!response.ok) throw new Error('Gagal menghubungi server backend Vercel / Node.js');
+                const data = await response.json();
+                const aiReply = data.choices[0].message.content;
+                removeLoading(); appendMessage('assistant', aiReply); conversationHistory.push({ role: "assistant", content: aiReply });
+            } catch (error) {
+                removeLoading(); appendMessage('system', `Peringatan: Server backend /api/chat belum berjalan atau sedang error.`); conversationHistory.pop();
+            }
+        }
+
+        chatForm.addEventListener('submit', (e) => { e.preventDefault(); e.stopPropagation(); const text = chatInput.value.trim(); if(text) fetchGroq(text); });
+        chatInput.addEventListener('keydown', (e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); chatForm.dispatchEvent(new Event('submit')); } });
+    </script>
+</body>
+</html>
